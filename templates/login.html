@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ToolsCraft Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        .logo { width: 120px; margin-bottom: 20px; }
+        input { width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { background: #2563eb; color: white; border: none; padding: 12px; width: 90%; cursor: pointer; border-radius: 8px; font-weight: bold; }
+        .error { color: red; margin-bottom: 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="/static/logo.png" alt="Logo" class="logo">
+        <h3>লগইন করুন</h3>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <form action="/login" method="POST">
+            <input type="text" name="username" placeholder="ইউজারনেম" required>
+            <input type="password" name="password" placeholder="পাসওয়ার্ড" required>
+            <button type="submit">লগইন</button>
+        </form>
+    </div>
+</body>
+</html>

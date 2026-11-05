@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - ToolsCraft Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #2563eb; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #e0e7ff; color: #1e40af; }
+        .form-box { background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eee; }
+        input { padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { background: #2563eb; color: white; border: none; padding: 9px 15px; cursor: pointer; border-radius: 5px; }
+        .btn-update { background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .btn-update:hover { background: #059669; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .btn-delete:hover { background: #dc2626; }
+        .btn-reset { background: #f59e0b; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .btn-reset:hover { background: #d97706; }
+        a.btn { display: inline-block; background: #4b5563; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; margin-bottom: 15px; }
+        .action-cell { display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
+        .credit-input { width: 60px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; margin-right: 2px;}
+        .tag-pill { display: inline-block; background: #dbeafe; color: #1e40af; font-weight: bold; padding: 3px 8px; border-radius: 6px; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="btn">← হোমপেজে ফিরে যান</a>
+        <h2>অ্যাডমিন প্যানেল</h2>
+        
+        <div class="form-box">
+            <h3>নতুন ইউজার তৈরি করুন</h3>
+            <form action="/admin/create_user" method="POST">
+                <input type="text" name="new_username" placeholder="ইউজারনেম" required>
+                <input type="password" name="new_password" placeholder="পাসওয়ার্ড" required>
+                <input type="number" name="initial_credits" placeholder="ডেইলি ক্রেডিট (যেমন: 5)" value="5" required>
+                <button type="submit">অ্যাড করুন</button>
+            </form>
+        </div>
+
+        <h3>ইউজার লিস্ট</h3>
+        <table>
+            <tr>
+                <th>ইউজারনেম</th>
+                <th>রোল</th>
+                <th>বাকি ক্রেডিট</th>
+                <th>আজকের ব্যবহৃত ক্রেডিট</th>
+                <th>অ্যাকশন (ক্রেডিট আপডেট ও ডিলিট)</th>
+            </tr>
+            {% for u in users %}
+            <tr>
+                <td style="font-weight: bold;">{{ u[0] }}</td>
+                <td>{{ u[1] }}</td>
+                <td style="color: #2563eb; font-weight: bold;">{{ u[2] }}</td>
+                <td style="color: #ef4444; font-weight: bold;">{{ u[3] }}</td>
+                <td>
+                    <div class="action-cell">
+                        <form action="/admin/update_credits" method="POST" style="margin: 0;">
+                            <input type="hidden" name="up_username" value="{{ u[0] }}">
+                            <input type="number" name="new_credits" value="{{ u[2] }}" class="credit-input" required>
+                            <button type="submit" class="btn-update">সেভ</button>
+                        </form>
+                        
+                        {% if u[0] != 'admin' %}
+                        <form action="/admin/delete_user" method="POST" style="margin: 0;" onsubmit="return confirm('আপনি কি নিশ্চিত যে এই ইউজারকে ডিলিট করতে চান?');">
+                            <input type="hidden" name="del_username" value="{{ u[0] }}">
+                            <button type="submit" class="btn-delete">ডিলিট</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h3 style="margin-top: 30px; color: #d97706;">ইউজারদের মোট ব্যবহৃত ক্রেডিট (রিসেট প্যানেল)</h3>
+        <table>
+            <tr>
+                <th>ইউজারনেম</th>
+                <th>মোট ব্যবহৃত ক্রেডিট</th>
+                <th>অ্যাকশন (রিসেট কাউন্ট)</th>
+            </tr>
+            {% for u in users %}
+            {% if u[1] != 'admin' %}
+            <tr>
+                <td style="font-weight: bold; color: #2563eb;">{{ u[0] }}</td>
+                <td style="color: #ef4444; font-weight: bold;">{{ u[4] }} টি</td>
+                <td>
+                    <form action="/admin/reset_used_credits" method="POST" style="margin: 0;" onsubmit="return confirm('আপনি কি নিশ্চিত যে {{ u[0] }} এর ব্যবহৃত ক্রেডিট রিসেট করে ০ (জিরো) করতে চান?');">
+                        <input type="hidden" name="rst_username" value="{{ u[0] }}">
+                        <button type="submit" class="btn-reset">রিসেট কাউন্ট</button>
+                    </form>
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </table>
+
+        <h3 style="margin-top: 30px;">সর্বশেষ ফাইল প্রসেসিং হিস্ট্রি</h3>
+        <table>
+            <tr>
+                <th>ইউজারনেম</th>
+                <th>ফাইলের নাম</th>
+                <th>ট্যাগ / কোড</th>
+                <th>সময়</th>
+            </tr>
+            {% for h in history %}
+            <tr>
+                <td style="font-weight: bold; color: #2563eb;">{{ h[0] }}</td>
+                <td>{{ h[1] }}</td>
+                <td>
+                    {% if h[3] %}
+                        <span class="tag-pill">{{ h[3] }}</span>
+                    {% else %}
+                        <span style="color: #999;">—</span>
+                    {% endif %}
+                </td>
+                <td style="font-size: 13px; color: #555;">{{ h[2] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h3 style="margin-top: 30px; color: #10b981;">সর্বশেষ ৫ দিনের ক্রেডিট রিপোর্ট (অটো-ডিলিট)</h3>
+        <table>
+            <tr>
+                <th>তারিখ</th>
+                <th>ইউজারনেম</th>
+                <th>ব্যবহৃত ক্রেডিট</th>
+            </tr>
+            {% for log in daily_usage %}
+            <tr>
+                <td style="font-size: 13px; color: #555; font-weight: bold;">{{ log.date }}</td>
+                <td style="font-weight: bold; color: #2563eb;">{{ log.username }}</td>
+                <td style="color: #ef4444; font-weight: bold;">{{ log.used }} টি</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" style="text-align: center; color: #777;">গত ৫ দিনে কোনো ক্রেডিট ব্যবহার হয়নি।</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>
