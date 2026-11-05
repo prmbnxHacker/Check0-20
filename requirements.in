@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+PyMuPDF
+jinja2
+python-multipart
+itsdangerous
+supabase
+python-dotenv
